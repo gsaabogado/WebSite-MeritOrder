@@ -1,5 +1,69 @@
 ---
 title: "About"
+description: |
+  This website contains all the data and code necessary to replicate the results of the study: Form merit to phyisical order dispatch: Evidence from the Mexican energy market.
+author: "Raul GutierrezLuis Sarmiento"
+format: 
+  html: 
+    toc: true
+    warning: false
+    code-fold: true
+    code-summary: "Show the Code"
 ---
 
-About this site
+# Introduction
+
+The website contains four primary sections to accompany the study:
+
+1. ***Data*** -- Includes a description of all the data files. It is divided into five subsections
+
+
+2. ***Model*** -- Short description the techno-economic energy model we use to estimate the effect of the dispatch change.
+
+
+3. ***Current Structure of the Mexican Energy System*** --  Rough description of the energy system in Mexico.
+
+4. ***Optimization Results*** -- Analysis of the dispatch change short and log term effects.
+
+
+:::{.callout-note}
+Consider that all sections contain the R or Julia codes necessary to replicate the study's figures, tables, and overall results. Regarding the construction of the data sets, I share the link to the dropbox repository alongside instructions to load the raw data files and transform them into the panel data I use in the empirical section.
+:::
+
+# Replication
+
+All the raw files needed to run the code are in the [dropbox repository](https://www.dropbox.com/sh/t948v6i0grdzcye/AAAosMFT2wcsFngmFEQVoDdaa?dl=0)
+
+If you want to replicate the study:
+
+Download all files of the [dropbox repository](https://www.dropbox.com/sh/t948v6i0grdzcye/AAAosMFT2wcsFngmFEQVoDdaa?dl=0) while considering your computer space constraints.[^1] 
+
+The files in the repository have a folder-like structure with the following key sections:
+
+[^1]: I recommend downloading the files to an external hard drive to avoid memory issues
+
+1) **00_RawData** -- Includes the raw data we use to feed the AnyMod energy model and study the effect of the merit order change. We organize the repository into four folders; *modelData*, *BAU*, *POD2030*, *POD2040*, and *POD2050*. 
+
+- While *modelData* contains the base data for the optimization analysis, the other four folders(*BAU*, *POD2030*, *POD2040*, *POD2050*) include the modifications we use to estimate the change in the merit order across the four scenarios.
+
+- In the Business as Usual (BAU) scenario, we optimized the energy system, assuming no change in the dispatch order. In Physical Order Dispatch (POD), we estimate the effect of changing to POD until 2030, 2040, and 2050, respectively.
+
+2) **02_GenData** -- Contains two folders; *01_AnyModResults* and *02_AnyModAnalysis*. 
+
+- *01_AnyModResults* has the raw results from the optimization model across all four scenarios. 
+
+- *02_AnyModAnalyis* includes a modified version of 01_AnyModResults suitable for the descriptives statistics using R we present in the paper. 
+
+- Note that in order to transform 01_AnyModResults to 02_AnyModAnalysis you need to run the scrip **03_scripts/01_LoadResults.R**
+
+3) **03_scripts** -- Includes all the R-scripts I use to transform the raw results into a useful format to perform descriptive statistics,. I divide this folder into two scripts: 
+
+::: {.incremental}
+- 01_LoadResults: Loads and clean the raw output from AnyMod
+- 02_desc: Runs the descriptive analysis of the AnyMod output
+:::
+
+
+4.  **WebSite-MeritOrder** -- This folder contains the Quarto files necessary to replicate this website
+
+

@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Replication\nAll the raw files needed to run the code are in the dropbox repository\nIf you want to replicate the study:\nDownload all files of the dropbox repository while considering your computer space constraints.1\nThe files in the repository have a folder-like structure with the following key sections:\n\n00_RawData – Includes the raw data we use to feed the AnyMod energy model and study the effect of the merit order change. We organize the repository into four folders; modelData, BAU, POD2030, POD2040, and POD2050.\n\n\nWhile modelData contains the base data for the optimization analysis, the other four folders(BAU, POD2030, POD2040, POD2050) include the modifications we use to estimate the change in the merit order across the four scenarios.\nIn the Business as Usual (BAU) scenario, we optimized the energy system, assuming no change in the dispatch order. In Physical Order Dispatch (POD), we estimate the effect of changing to POD until 2030, 2040, and 2050, respectively.\n\n\n02_GenData – Contains two folders; 01_AnyModResults and 02_AnyModAnalysis.\n\n\n01_AnyModResults has the raw results from the optimization model across all four scenarios.\n02_AnyModAnalyis includes a modified version of 01_AnyModResults suitable for the descriptives statistics using R we present in the paper.\nNote that in order to transform 01_AnyModResults to 02_AnyModAnalysis you need to run the scrip 03_scripts/01_LoadResults.R\n\n\n03_scripts – Includes all the R-scripts I use to transform the raw results into a useful format to perform descriptive statistics,. I divide this folder into two scripts:\n\n\n\n01_LoadResults: Loads and clean the raw output from AnyMod\n02_desc: Runs the descriptive analysis of the AnyMod output\n\n\n\nWebSite-MeritOrder – This folder contains the Quarto files necessary to replicate this website\n\n\n\n\n\n\nFootnotes\n\n\nI recommend downloading the files to an external hard drive to avoid memory issues↩︎"
+  },
+  {
+    "objectID": "01_desc.html",
+    "href": "01_desc.html",
+    "title": "Current Structure of the Mexican Energy System",
+    "section": "",
+    "text": "Footnotes\n\n\nWe do not include low-temperature (or residential) heating because the share of energy demand for heating in Mexico is marginal and the energy demand for cooling is connected to the power-sector demand for electricity↩︎"
+  },
+  {
+    "objectID": "02_results.html",
+    "href": "02_results.html",
+    "title": "Analysis of AnyMod output",
+    "section": "",
+    "text": "First, we look at the effects of the optimization on endogenous power demand. It appears that that there are no effects (fortunately) on endogenous energy demand. Our two sectors with the highest demand for energy are power and high temperature (industrial) heating, followed by passenger and freight transport.\n\n\n\n\n\nShow the Code\n# Load the data\n\n# Construct the data for the plot \nplot = data  |>  group_by(carrier, period) |> \n  summarise(value = sum(abs(value)))\n# Plot power demand\nggplot(plot) + \n  geom_line(aes(x = period, y = value, color = carrier, group = carrier))  +\n   geom_point(aes(x = period, y = value, color = carrier, group = carrier))  +\n  theme_economist() %+replace% theme(legend.title = element_blank()) +\n  grids() + labs(x = \"Year\", y = \"Total demand (PJ)\") + scale_color_viridis_d()\n\n\n\n\n\nFigure 1: Endogenous Energy Demand\n\n\n\n\n\n\n\n\n\n\n\n\nShow the Code\n# PLOT 1\n# Create the plot data\n\nplot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & technology == \"Electric\")  |> \n  group_by(scenario, period, type) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))\n\n# Create the bar plot with raw values\nggplot(plot) +  facet_wrap(~period, ncol = 4)  + \n  geom_bar(aes(x = scenario, y = value,  fill = type, group = type), position = \"dodge\", stat = \"identity\") +\n  theme_economist() %+replace% \n  theme(legend.title = element_blank(), legend.position = \"bottom\", strip.text = element_text(hjust = 0),\n        axis.title = element_blank(), axis.text.x = element_text(size = 6)) \n\n\n\n\n\n\n\nShow the Code\n# PLOT 2\n# Create the plot data\nplot2 = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & technology == \"Electric\")  |> \n  group_by(scenario, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))\n\nggplot(plot2) + \n  geom_line(aes(x = period, y = value, color = scenario))  +\n   geom_point(aes(x = period, y = value, color = scenario))  +\n  theme_economist() %+replace% theme(legend.title = element_blank()) +\n  grids() + labs(x = \"Year\", y = \"Transportation electrification (Energy use in GWh)\", size = 5)"
+  },
+  {
+    "objectID": "02_results.html#cost-comparison-between-scenarios",
+    "href": "02_results.html#cost-comparison-between-scenarios",
+    "title": "Analysis of AnyMod output",
+    "section": "Cost comparison between scenarios",
+    "text": "Cost comparison between scenarios\n\n\n\n\n\nShow the Code\n# Create the plot data\nplot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050)) |> \n  group_by(scenario, period, variable) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))\n\n# Create the bar plot with raw values\nggplot(plot) +  facet_wrap(~period, ncol = 4)  + \n  geom_bar(aes(x = scenario, y = value,  fill = variable, group = variable), position = \"dodge\", stat = \"identity\") + theme_economist() %+replace% \n  theme(legend.title = element_blank(), legend.position = \"bottom\", strip.text = element_text(hjust = 0),\n        axis.title = element_blank(), axis.text.x = element_text(size = 6))"
+  },
+  {
+    "objectID": "02_results.html#effects-on-emissions",
+    "href": "02_results.html#effects-on-emissions",
+    "title": "Analysis of AnyMod output",
+    "section": "Effects on emissions",
+    "text": "Effects on emissions\n\n\n\n\n\nShow the Code\n# Create the plot data\nplot = data |> \n  group_by(scenario, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5)) |> group_by(scenario) |> mutate(cumsum = cumsum(value))\n\nggplot(plot) + \n  geom_line(aes(x = period, y = cumsum, color = scenario))  +\n   geom_point(aes(x = period, y = cumsum, color = scenario))  +\n  theme_economist() %+replace% theme(legend.title = element_blank()) +\n  grids() + labs(x = \"Year\", y = \"Emissions\", size = 5)\n\n\n\n\n\nShow the Code\nggplot(plot) + \n  geom_bar(aes(x = period, y = cumsum, fill = scenario), stat = \"identity\", position = \"dodge\")  +\n  theme_economist() %+replace% theme(legend.title = element_blank()) +\n  grids() + labs(x = \"Year\", y = \"Emissions\", size = 5)"
+  }
+]

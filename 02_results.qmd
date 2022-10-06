@@ -1,5 +1,5 @@
 ---
-title: "Results"
+title: "Analysis of AnyMod output"
 format: 
   html: 
     toc: true
@@ -8,24 +8,21 @@ format:
     code-summary: "Show the Code"
 ---
 
-# Load the data sets
-
-```{r}
-# Load the data
-demand = read_rds("01_GenData/demand.rds")
-ResCap = read_rds("01_GenData/ResidualCapacity.rds")
-gen = read_rds("01_GenData/gen.rds")
-transport = read_rds("01_GenData/transport.rds")
-costs = read_rds("01_GenData/Costs.rds")
-emissions = read_rds("01_GenData/PowerEmissions.rds")
-conflict_prefer("filter", "dplyr")
-```
 
 # Effects on energy demand
 
 ## Endogenous energy demand
 
 First, we look at the effects of the optimization on endogenous power demand. It appears that that there are no effects (fortunately) on endogenous energy demand. Our two sectors with the highest demand for energy are power and high temperature (industrial) heating, followed by passenger and freight transport.
+
+```{r}
+#| echo: false
+# Change the working directory
+file = gsub("WebSite-MeritOrder", "", getwd())
+# Load the demand file
+data = read_rds(paste0(file, "01_GenData/02_AnyModAnalysis/demand.rds"))
+```
+
 
 ```{r}
 #| label: fig-EndogenousDemand
@@ -35,7 +32,7 @@ First, we look at the effects of the optimization on endogenous power demand. It
 # Load the data
 
 # Construct the data for the plot 
-plot = demand  |>  group_by(carrier, period) |> 
+plot = data  |>  group_by(carrier, period) |> 
   summarise(value = sum(abs(value)))
 # Plot power demand
 ggplot(plot) + 
@@ -47,12 +44,21 @@ ggplot(plot) +
 ```
 
 ## Transportation electrification across scenarios
+```{r}
+#| echo: false
+# Change the working directory
+file = gsub("WebSite-MeritOrder", "", getwd())
+# Load the demand file
+data = read_rds(paste0(file, "01_GenData/02_AnyModAnalysis/transport.rds"))
+```
+
 
 ```{r}
 
 # PLOT 1
 # Create the plot data
-plot = transport %>% filter(period %in% c(2020, 2030, 2040, 2050) & technology == "Electric")  |> 
+
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & technology == "Electric")  |> 
   group_by(scenario, period, type) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))
 
 # Create the bar plot with raw values
@@ -66,7 +72,7 @@ ggplot(plot) +  facet_wrap(~period, ncol = 4)  +
 ```{r}
 # PLOT 2
 # Create the plot data
-plot2 = transport %>% filter(period %in% c(2020, 2030, 2040, 2050) & technology == "Electric")  |> 
+plot2 = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & technology == "Electric")  |> 
   group_by(scenario, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))
 
 ggplot(plot2) + 
@@ -80,6 +86,16 @@ ggplot(plot2) +
 
 # Changes in the capacity Matrix
 ::: panel-tabset
+
+```{r}
+#| echo: false
+# Change the working directory
+file = gsub("WebSite-MeritOrder", "", getwd())
+# Load the demand file
+data = read_rds(paste0(file, "01_GenData/02_AnyModAnalysis/ResidualCapacity.rds"))
+```
+
+
 ## Capacity Values
 ```{r}
 #| label: fig-ValueCapMatrix
@@ -87,7 +103,7 @@ ggplot(plot2) +
 #| fig-cap-location: top
 #| echo: true
 # Create the plot data
-plot = ResCap %>% filter(period %in% c(2020, 2030, 2040, 2050) & variable == "capaConv")  |> 
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & variable == "capaConv")  |> 
   group_by(scenario, technology, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5)) |> 
   mutate(scenario = factor(scenario, levels = c("BAU\nModel", "POD\nShort", "POD\nMid", "POD\nLong")))
 # Create the bar plot with raw values
@@ -108,10 +124,10 @@ ggplot(plot) +  facet_wrap(~period, ncol = 4)  +
 #| fig-cap-location: top
 #| echo: true
 # Create the plot data
-plot = ResCap %>% filter(period %in% c(2020, 2030, 2040, 2050) & variable == "capaConv") %>%
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & variable == "capaConv") %>%
   group_by(scenario, technology, period) |> summarise(value = sum(value)) %>% 
   group_by(scenario, period) %>%
-  mutate(share = round((value/sum(value))*100,4)) |> filter(share > 0) |> mutate(scenario = str_wrap(scenario, 5)) |> 
+  mutate(share = round((value/sum(value))*100,4)) |> dplyr::filter(share > 0) |> mutate(scenario = str_wrap(scenario, 5)) |> 
   mutate(scenario = factor(scenario, levels = c("BAU\nModel", "POD\nShort", "POD\nMid", "POD\nLong")))
 # Create the bar plot with raw values
 ggplot(plot) +  facet_wrap(~period, ncol = 4)  + 
@@ -132,7 +148,7 @@ ggplot(plot) +  facet_wrap(~period, ncol = 4)  +
 #| fig-cap-location: top
 #| echo: true
 # Create the plot data
-plot = ResCap %>% filter(period %in% c(2020, 2030, 2040, 2050) & variable == "expConv")  |> 
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050) & variable == "expConv")  |> 
   group_by(scenario, technology, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5)) |> 
   mutate(scenario = factor(scenario, levels = c("BAU\nModel", "POD\nShort", "POD\nMid", "POD\nLong")))
 # Create the bar plot with raw values
@@ -151,6 +167,14 @@ ggplot(plot) +  facet_wrap(~period, ncol = 4)  +
 
 The following figure shows the effects of changing the merit order to physical delivery dispatch at different time-intervals, i.e., 2020, 2030, 2040, and 2050.
 
+```{r}
+#| echo: false
+# Change the working directory
+file = gsub("WebSite-MeritOrder", "", getwd())
+# Load the demand file
+data = read_rds(paste0(file, "01_GenData/02_AnyModAnalysis/gen.rds"))
+```
+
 ::: panel-tabset
 ## Raw
 ```{r}
@@ -160,7 +184,7 @@ The following figure shows the effects of changing the merit order to physical d
 #| echo: true
 
 # Create the plot data
-plot = gen %>% filter(period %in% c(2020, 2030, 2040, 2050)) %>%
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050)) %>%
   mutate(scenario = gsub("POD", "", scenario)) %>% 
   mutate(scenario = as.factor(scenario)) %>% mutate(scenario, relevel(scenario, "BAU")) |> 
   group_by(scenario, technology, period) |> summarise(value = sum(value))
@@ -179,7 +203,7 @@ ggplot(plot) +  facet_wrap(~period, ncol = 4)  +
 #| fig-cap-location: top
 #| echo: true
 # Create the plot data
-plot = gen %>% filter(period %in% c(2020, 2030, 2040, 2050)) %>%
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050)) %>%
   mutate(scenario = gsub("POD", "", scenario)) %>% 
   mutate(scenario = as.factor(scenario)) %>% mutate(scenario, relevel(scenario, "BAU")) |> 
   group_by(scenario, technology, period) %>%
@@ -206,13 +230,13 @@ As it is clear from the picture, there are no strong changes in the generation M
 #| tbl-cap-location: top
 #| echo: true
 # Calculate the changes in generation w.r.t. BAU per technology 
-tab = gen %>% group_by(period, scenario) %>% summarise(value = sum(value)) %>%
+tab = data %>% group_by(period, scenario) %>% summarise(value = sum(value)) %>%
   spread(., scenario, value) |> 
   mutate(POD2030 = paste0(round(POD2030 - BAU,2), " (",round(((POD2030 - BAU)/BAU)*100,2), "%", ")"), 
          POD2040 = paste0(round(POD2040 - BAU,2), " (",round(((POD2040 - BAU)/BAU)*100,2), "%", ")"),
          POD2050 = paste0(round(POD2050 - BAU,2), " (",round(((POD2050 - BAU)/BAU)*100,2), "%", ")")) %>%
   select(-BAU) %>% gather(., scenario, value, -c(period)) %>% 
-  filter(period %in% c(2020, 2030, 2040, 2050))  %>% spread(., period, value) |> rename(Scenario = scenario) 
+  dplyr::filter(period %in% c(2020, 2030, 2040, 2050))  %>% spread(., period, value) |> rename(Scenario = scenario) 
 # Calculate the percentage change in BAU generation
 #### Create the table ####
 kbl(tab) %>% 
@@ -227,7 +251,7 @@ Figure X shows the polar difference (Esto solo fue un experimento rulo, creo el 
 
 ```{r}
 #### Construct the data for the plot ####
-plot = gen %>% filter(period %in% c(2020, 2030, 2040, 2050)) %>%
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050)) %>%
   mutate(scenario = gsub("POD", "POD-", scenario)) %>% 
   mutate(TechGroup = gsub("Solar|Wind", "Renewable", TechGroup)) |> 
   group_by(scenario, TechGroup, period) |> 
@@ -238,23 +262,23 @@ plot = gen %>% filter(period %in% c(2020, 2030, 2040, 2050)) %>%
   group_by(TechGroup, period, scenario) %>% mutate(ymax = cumsum(perc)) %>% 
   mutate(ymin = ymax - perc) %>% 
   mutate_at(vars(starts_with("y", ignore.case = FALSE)), rescale, to = pi*c(-.5,.5), from = 0:1) |> 
-  filter(TechGroup == "Renewable")
+  dplyr::filter(TechGroup == "Renewable")
 #### Add the text for the plot ####
 text_df <- tibble(x = c(0.25, 0.5, 0.75, 1),
                   y = c(-0.1, -0.1, -0.1, -0.1), 
                   label = c("2020", "2030", "2040", "2050"))
 #### Construct the plot ####
 ggplot() +   facet_wrap(~scenario , nrow = 2)  +
-  geom_arc_bar(data = filter(plot, period == 2050),
+  geom_arc_bar(data = dplyr::filter(plot, period == 2050),
                aes(x0 = 0, y0 = 0, r0 = 0.8, r = 1, start = ymin, end = ymax, fill = type), 
                color = "#949398") +
-  geom_arc_bar(data = filter(plot, period == 2040),
+  geom_arc_bar(data = dplyr::filter(plot, period == 2040),
                aes(x0 = 0, y0 = 0, r0 = 0.6, r = 0.75, start = ymin, end = ymax, fill = type), 
                color = "#949398") + 
-  geom_arc_bar(data = filter(plot, period == 2030),
+  geom_arc_bar(data = dplyr::filter(plot, period == 2030),
                aes(x0 = 0, y0 = 0, r0 = 0.4, r = 0.55, start = ymin, end = ymax, fill = type), 
                color = "#949398") +
-  geom_arc_bar(data = filter(plot, period == 2020),
+  geom_arc_bar(data = dplyr::filter(plot, period == 2020),
                aes(x0 = 0, y0 = 0, r0 = 0.2, r = 0.35, start = ymin, end = ymax, fill = type), 
                color = "#949398") +
   geom_text(data = text_df, mapping = aes(x = x, y = y, label = label), size = 2) + 
@@ -268,8 +292,17 @@ ggplot() +   facet_wrap(~scenario , nrow = 2)  +
 ```
 ## Cost comparison between scenarios
 ```{r}
+#| echo: false
+# Change the working directory
+file = gsub("WebSite-MeritOrder", "", getwd())
+# Load the demand file
+data = read_rds(paste0(file, "01_GenData/02_AnyModAnalysis/Costs.rds"))
+```
+
+
+```{r}
 # Create the plot data
-plot = costs %>% filter(period %in% c(2020, 2030, 2040, 2050)) |> 
+plot = data %>% dplyr::filter(period %in% c(2020, 2030, 2040, 2050)) |> 
   group_by(scenario, period, variable) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))
 
 # Create the bar plot with raw values
@@ -279,18 +312,31 @@ ggplot(plot) +  facet_wrap(~period, ncol = 4)  +
         axis.title = element_blank(), axis.text.x = element_text(size = 6)) 
 ```
 ## Effects on emissions
+```{r}
+#| echo: false
+# Change the working directory
+file = gsub("WebSite-MeritOrder", "", getwd())
+# Load the demand file
+data = read_rds(paste0(file, "01_GenData/02_AnyModAnalysis/PowerEmissions.rds"))
+```
+
 
 ```{r}
 # Create the plot data
-plot = emissions %>% filter(period %in% c(2020, 2030, 2040, 2050)) |> 
-  group_by(scenario, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5))
+plot = data |> 
+  group_by(scenario, period) |> summarise(value = sum(value)) |> mutate(scenario = str_wrap(scenario, 5)) |> group_by(scenario) |> mutate(cumsum = cumsum(value))
 
 ggplot(plot) + 
-  geom_line(aes(x = period, y = value, color = scenario))  +
-   geom_point(aes(x = period, y = value, color = scenario))  +
+  geom_line(aes(x = period, y = cumsum, color = scenario))  +
+   geom_point(aes(x = period, y = cumsum, color = scenario))  +
   theme_economist() %+replace% theme(legend.title = element_blank()) +
   grids() + labs(x = "Year", y = "Emissions", size = 5)
 
+
+ggplot(plot) + 
+  geom_bar(aes(x = period, y = cumsum, fill = scenario), stat = "identity", position = "dodge")  +
+  theme_economist() %+replace% theme(legend.title = element_blank()) +
+  grids() + labs(x = "Year", y = "Emissions", size = 5)
 
 
 ```

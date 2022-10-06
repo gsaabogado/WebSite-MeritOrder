@@ -1,19 +1,41 @@
 project:
   type: website
+  output-dir: docs
+  render:
+    - about.qmd
+    - 01_desc.qmd
+    - 02_results.qmd
 
 website:
-  title: "WebSite-MeritOrder"
+  title: "The effect of changing dispatch from merit to physical order dispatch"
   navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+    search: true
+    pinned: true
+    collapse: true
+    right:
+      - text: Home
+        href: about.qmd 
+      - icon: github
+        href: https://github.com/gsaabogado
+      - icon: twitter
+        href: https://twitter.com/gsaabogado
+      - text: Personal Site
+        href: https://luissarmiento.net/
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Sections"
+        contents:
+        - about.qmd
+        - 01_desc.qmd
+        - 02_results.qmd
 
 format:
   html:
-    theme: cosmo
-    css: styles.css
-    toc: true
+    theme: 
+     -custom.scss
+
 
 
 
